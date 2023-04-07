@@ -1,0 +1,58 @@
+POST /api/v1/auth/register,
+POST /api/v1/auth/login
+->
+{
+	login: str
+	password: str
+}
+<-
+{
+	token: str
+	session_id: str
+}
+
+
+POST /api/v1/auth/logout
+Authorization: <token:str>
+<-204
+
+
+GET /api/v1/chat/dialogs
+Authorization: <token:str>
+<-
+[
+	{
+		dialog_id: str
+		username: str
+		new_messages: bool
+	}
+]
+
+
+GET /api/v1/chat/messages?dialog=<dialog_id:str>
+Authorization: <token:str>
+<-
+[
+	{
+		timestamp: int // unix timestamp in milliseconds
+		type: int // 0 - not my, 1 - my
+		text: str
+	}
+]
+
+
+POST /api/v1/chat/messages
+Authorization: <token:str>
+->
+{
+	dialog_id: str
+	text: str
+}
+<-204
+
+
+WS /gateway
+// Op's: 0 - hello (<-), 1 - identify (->), 2 - new message (<-), 3 - heartbeat (->)
+<- {"op": 0, "d": {"heartbeat_interval": int}}
+-> {"op": 1, "d": {"token": <token:str>, "session_id": <session_id:str>}}
+<- {"op": 2, "d": {"dialog_id": str, "message": {"timestamp": int, "type": int, "text": str}}}
