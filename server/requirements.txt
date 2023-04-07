@@ -1,0 +1,4 @@
+quart~=0.18.3
+quart-schema~=0.15.0
+pydantic~=1.10.5
+uvicorn~=0.18.2
