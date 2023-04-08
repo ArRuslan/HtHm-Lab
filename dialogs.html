@@ -14,12 +14,16 @@
 </head>
 <body class="theme-dark">
     <main class="content content-dialogs grid-container" style="height: 90vh;">
+        <div class="dialog-add">
+            <button onclick="newDialog();">Add</button>
+        </div>
+
         <div class="dialogs-list">
             <ul class="dialogs" id="dialogs"></ul>
         </div>
 
-        <div class="dialog-title">
-            Username
+        <div class="dialog-title" id="dialog-title">
+            Select dialog
         </div>
 
         <div class="messages-list">
@@ -29,6 +33,7 @@
         <div class="dialog-input">
             <input type="text" name="message" placeholder="Text..." id="message-input">
         </div>
+
         <div class="dialog-send-button">
             <button onclick="sendMessage();">Send</button>
         </div>

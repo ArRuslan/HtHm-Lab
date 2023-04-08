@@ -2,3 +2,7 @@ quart~=0.18.3
 quart-schema~=0.15.0
 pydantic~=1.10.5
 uvicorn~=0.18.2
+quart-sqlalchemy~=2.0.0
+aiosqlite~=0.18.0
+SQLAlchemy~=2.0.9
+bcrypt~=4.0.1

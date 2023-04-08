@@ -1,10 +1,41 @@
-from quart import Quart
-from quart_schema import QuartSchema
+from quart import Quart, Response
+from quart_schema import QuartSchema, RequestSchemaValidationError
 
+from .db import init_db
+from .exceptions import RequestError
 from .routes import auth, chat
+from .utils import c_json
 
 app = Quart("IdkChat")
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite+aiosqlite:///idkchat.db"
+
 QuartSchema(app)
+
+
+@app.before_serving
+async def _init_db():
+    await init_db()
+
+
+@app.errorhandler(RequestError)
+async def handle_idkchat_validation_error(error: RequestError):
+    return c_json({"message": error.message}, error.code)
+
+
+@app.errorhandler(RequestSchemaValidationError)
+async def handle_validation_error(error: RequestSchemaValidationError):
+    return c_json({"message": "Something wrong with data you provided!"}, 400)
+
+
+@app.after_request
+async def set_cors_headers(response: Response) -> Response:
+    response.headers['Server'] = "YEPcord"
+    response.headers['Access-Control-Allow-Origin'] = "*"
+    response.headers['Access-Control-Allow-Headers'] = "*"
+    response.headers['Access-Control-Allow-Methods'] = "*"
+    response.headers['Content-Security-Policy'] = "connect-src *;"
+    return response
+
 
 app.register_blueprint(auth.auth, url_prefix="/api/v1/auth")
 app.register_blueprint(chat.chat, url_prefix="/api/v1/chat")

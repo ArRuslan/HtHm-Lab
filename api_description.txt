@@ -8,7 +8,6 @@ POST /api/v1/auth/login
 <-
 {
 	token: str
-	session_id: str
 }
 
 
@@ -22,14 +21,14 @@ Authorization: <token:str>
 <-
 [
 	{
-		dialog_id: str
+		id: int
 		username: str
 		new_messages: bool
 	}
 ]
 
 
-GET /api/v1/chat/messages?dialog=<dialog_id:str>
+GET /api/v1/chat/messages?dialog=<dialog_id:int>
 Authorization: <token:str>
 <-
 [
@@ -45,14 +44,13 @@ POST /api/v1/chat/messages
 Authorization: <token:str>
 ->
 {
-	dialog_id: str
+	dialog_id: int
 	text: str
 }
 <-204
 
 
 WS /gateway
-// Op's: 0 - hello (<-), 1 - identify (->), 2 - new message (<-), 3 - heartbeat (->)
-<- {"op": 0, "d": {"heartbeat_interval": int}}
--> {"op": 1, "d": {"token": <token:str>, "session_id": <session_id:str>}}
-<- {"op": 2, "d": {"dialog_id": str, "message": {"timestamp": int, "type": int, "text": str}}}
+// Op's: 0 - identify (->), 1 - new message (<-)
+-> {"op": 0, "d": {"token": <token:str>}}
+<- {"op": 1, "d": {"dialog": {"id": int, "username": str}, "message": {"timestamp": int, "type": int, "text": str}}}
