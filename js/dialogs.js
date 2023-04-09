@@ -5,6 +5,7 @@ const message_input = document.getElementById("message-input");
 
 window.DIALOGS = {};
 window.CURRENT_DIALOG = 0;
+window._WS = null;
 //window.MESSAGES_CACHE = [{}, {}];
 
 function addDialog(dialog_id, username, avatar_url) {
@@ -29,6 +30,7 @@ function addDialog(dialog_id, username, avatar_url) {
     dialog.appendChild(name);
     dialogs.appendChild(dialog);
 }
+
 function clearMessages() {
     messages.innerHTML = "";
 }
@@ -42,8 +44,13 @@ function addMessage(dialog_id, message_id, type, text, time) {
             "time": time
         };
     }*/
+    if(document.getElementsByClassName(`message-id-${message_id}`).length > 0)
+        return;
+    if(getSelectedDialog() !== dialog_id)
+        return;
 
     let message = document.createElement("li");
+    message.classList.add(`message-id-${message_id}`);
     message.classList.add(type === 0 ? "my-message" : "message");
 
     let date = new Date(time);
@@ -68,7 +75,7 @@ function padDate(d) {
 
 function getSelectedDialog() {
     let selected_dialogs = document.getElementsByClassName("dialog-selected");
-    if(selected_dialogs) {
+    if(selected_dialogs.length > 0) {
         for(let className in selected_dialogs[0].classList) {
             if(className.startsWith("dialog-id-"))
                 return parseInt(className.replace("dialog-id-", ""));
@@ -77,7 +84,7 @@ function getSelectedDialog() {
     return CURRENT_DIALOG;
 }
 
-async function sendMessage(dialog_id) {
+async function sendMessage() {
     let text = message_input.value.trim();
     if(!text)
         return;
@@ -190,4 +197,49 @@ async function newDialog() {
 
 window.addEventListener("DOMContentLoaded", () => {
     fetchDialogs().then();
+}, false);
+
+function _ws_handle_1(data) {
+    let dialog = data["dialog"];
+    addDialog(dialog["id"], dialog["username"], "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMafj/HwAGFwLkTJBHPQAAAABJRU5ErkJggg==");
+
+    let message = data["message"];
+    addMessage(dialog["id"], message["id"], message["type"], message["text"], message["time"]);
+}
+
+window.WS_HANDLERS = {
+    1: _ws_handle_1
+}
+
+function initWs() {
+    window._WS = ws = new WebSocket("wss://127.0.0.1:8000/ws");
+
+    ws.addEventListener("open", (event) => {
+        ws.send(JSON.stringify({
+            "op": 0,
+            "d": {
+                "token": localStorage.getItem("token")
+            }
+        }));
+    });
+
+    ws.addEventListener("message", (event) => {
+        const data = JSON.parse(event.data);
+        if(data["op"] in WS_HANDLERS) {
+            WS_HANDLERS[data["op"]](data["d"])
+        }
+    });
+
+    ws.addEventListener("close", (event) => {
+        if(event.code === 4001) {
+            localStorage.removeItem("token");
+            location.href = "/lb1/auth.html";
+            return;
+        }
+        initWs();
+    });
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    initWs();
 }, false);

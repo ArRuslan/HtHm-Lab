@@ -5,7 +5,7 @@ from hmac import new
 from json import loads, dumps
 from os import environ
 from time import time
-from typing import Union, Optional
+from typing import Union, Optional, Hashable, Any
 
 from bcrypt import hashpw, gensalt, checkpw
 from quart import request
@@ -145,3 +145,12 @@ def c_json(json, code=200, headers=None):
     for k, v in headers.items():
         h[k] = v
     return json, code, h
+
+
+class DictList(dict):
+    def __setitem__(self, key: Hashable, value: Any):
+        try:
+            self[key]
+        except KeyError:
+            super(DictList, self).__setitem__(key, [])
+        self[key].append(value)

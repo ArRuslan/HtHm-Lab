@@ -88,16 +88,27 @@
     margin-top: 2px;
 }
 
+.message {
+    margin-top: 10px;
+    float: left !important;
+    text-align: left !important;
+    margin-right: 10px;
+    width: 100%;
+}
+
+.message > span {
+    vertical-align: top;
+    margin-left: 3px;
+    font-size: 18px !important;
+    color: var(--gradient-1);
+}
+
 .my-message {
     margin-top: 10px;
     float: right !important;
     text-align: right !important;
     margin-right: 10px;
     width: 100%;
-}
-
-.my-message > img {
-    border-radius: 50%;
 }
 
 .my-message > .message-time, .message > .message-time {
@@ -109,6 +120,7 @@
     vertical-align: top;
     margin-left: 3px;
     font-size: 18px !important;
+    color: var(--gradient-2);
 }
 
 .dialog-add {

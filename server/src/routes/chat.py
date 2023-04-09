@@ -7,6 +7,7 @@ from sqlalchemy import select, and_, or_
 from .models.chat import MessagesGet, MessagePost, DialogCreate
 from ..db import async_session
 from ..exceptions import ValidateError
+from ..gateway import Gateway
 from ..models.chats import Dialog, Message
 from ..models.users import Session, User
 from ..utils import getSession, c_json, getDialog
@@ -59,6 +60,10 @@ async def create_dialog(session: Session, data: DialogCreate):
         await message.create(sess)
 
         await sess.commit()
+
+    await Gateway.getInstance().send_message(session.user_id, dialog, message)
+    await Gateway.getInstance().send_message(dialog.other_user(session.user_id), dialog, message)
+
     return c_json({
         "id": dialog.id,
         "username": other_user.login
@@ -74,11 +79,11 @@ async def get_messages(query_args: MessagesGet, dialog: Dialog, session: Session
 
     async with async_session() as sess:
         stmt = select(Message).where(Message.dialog_id == dialog.id)
-        for message in await sess.scalars(stmt):
+        for message in (await sess.scalars(stmt)).all():
             messages.append({
                 "type": 1 if message.author_id != session.user_id else 0,
                 "text": message.text,
-                "message_id": message.id,
+                "id": message.id,
                 "time": message.created_at*1000
             })
 
@@ -95,5 +100,8 @@ async def post_message(data: MessagePost, dialog: Dialog, session: Session):
         await message.create(sess)
 
         await sess.commit()
+
+    await Gateway.getInstance().send_message(session.user_id, dialog, message)
+    await Gateway.getInstance().send_message(dialog.other_user(session.user_id), dialog, message)
 
     return "", 204
