@@ -115,7 +115,7 @@ async function sendMessage() {
     });
     if(resp.status === 401) {
         localStorage.removeItem("token");
-        location.href = "/lb1/auth.html";
+        location.href = "/auth.html";
     }
 
     if(resp.status >= 400 && resp.status < 405) {
@@ -141,7 +141,7 @@ async function fetchDialogs() {
     });
     if(resp.status === 401) {
         localStorage.removeItem("token");
-        location.href = "/lb1/auth.html";
+        location.href = "/auth.html";
     }
 
     for(let dialog of await resp.json()) {
@@ -157,7 +157,7 @@ async function fetchMessages(dialog_id) {
     });
     if(resp.status === 401) {
         localStorage.removeItem("token");
-        location.href = "/lb1/auth.html";
+        location.href = "/auth.html";
     }
 
     for(let message of await resp.json()) {
@@ -197,7 +197,7 @@ async function newDialog() {
     });
     if(resp.status === 401) {
         localStorage.removeItem("token");
-        location.href = "/lb1/auth.html";
+        location.href = "/auth.html";
     }
 
     let jsonResp = await resp.json();
@@ -249,7 +249,7 @@ function initWs() {
     ws.addEventListener("close", (event) => {
         if(event.code === 4001) {
             localStorage.removeItem("token");
-            location.href = "/lb1/auth.html";
+            location.href = "/auth.html";
             return;
         }
         setTimeout(initWs, 1000);

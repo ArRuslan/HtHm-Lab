@@ -28,7 +28,7 @@ async function _processAuthResponse(resp) {
     }
 
     localStorage.setItem("token", jsonResp["token"]);
-    location.href = "/lb1/dialogs.html";
+    location.href = "/dialogs.html";
 }
 
 async function login() {
@@ -69,5 +69,5 @@ async function register() {
 
 window.addEventListener("DOMContentLoaded", async () => {
     if(localStorage.getItem("token"))
-        location.href = "/lb1/dialogs.html";
+        location.href = "/dialogs.html";
 }, false);
