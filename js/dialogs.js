@@ -6,15 +6,39 @@ const message_input = document.getElementById("message-input");
 window.DIALOGS = {};
 window.CURRENT_DIALOG = 0;
 window._WS = null;
-//window.MESSAGES_CACHE = [{}, {}];
 
-function addDialog(dialog_id, username, avatar_url) {
-    if(dialog_id in DIALOGS) return;
-    DIALOGS[dialog_id] = {"username": username, "avatar_url": avatar_url, "dialog_id": dialog_id};
+function updateDialog(dialog_id) {
+    let dialog_obj = DIALOGS[dialog_id];
+    let dialog = document.getElementById(`dialog-id-${dialog_id}`);
+    if(!dialog || !dialog_obj) return;
+
+    let username;
+    for(let childNode of dialog.childNodes) {
+        console.log(childNode.nodeName)
+        if(childNode.nodeName === "SPAN") {
+            username = childNode;
+            break;
+        }
+    }
+    console.log(username)
+    if(!username) return;
+
+    username.innerText = dialog_obj["username"];
+    username.style.color = dialog_obj["new_messages"] ? "#ff0000" : "";
+}
+
+function addDialog(dialog_id, username, avatar_url, new_messages=true) {
+    if(dialog_id in DIALOGS) {
+        DIALOGS[dialog_id]["username"] = username;
+        DIALOGS[dialog_id]["new_messages"] = new_messages;
+        updateDialog(dialog_id);
+        return;
+    }
+    DIALOGS[dialog_id] = {"username": username, "avatar_url": avatar_url, "dialog_id": dialog_id, "new_messages": new_messages};
 
     let dialog = document.createElement("li");
     dialog.classList.add("dialog");
-    dialog.classList.add(`dialog-id-${dialog_id}`);
+    dialog.id = `dialog-id-${dialog_id}`;
     dialog.addEventListener("click", () => {selectDialog(dialog_id)});
 
     let avatar_img = document.createElement("img");
@@ -24,10 +48,13 @@ function addDialog(dialog_id, username, avatar_url) {
 
     let name = document.createElement("span");
     name.innerText = username;
+    if(new_messages)
+        name.style.color = "#ff0000";
 
     dialog.appendChild(avatar_img);
     dialog.innerHTML += "\n";
     dialog.appendChild(name);
+
     dialogs.appendChild(dialog);
 }
 
@@ -36,14 +63,6 @@ function clearMessages() {
 }
 
 function addMessage(dialog_id, message_id, type, text, time) {
-    /*if(!(message_id in MESSAGES_CACHE[0])) {
-        MESSAGES_CACHE[0][message_id] = MESSAGES_CACHE[1][dialog_id] = {
-            "message_id": message_id,
-            "type": type,
-            "text": text,
-            "time": time
-        };
-    }*/
     if(document.getElementsByClassName(`message-id-${message_id}`).length > 0)
         return;
     if(getSelectedDialog() !== dialog_id)
@@ -56,7 +75,7 @@ function addMessage(dialog_id, message_id, type, text, time) {
     let date = new Date(time);
     let timestamp = document.createElement("span");
     timestamp.classList.add("message-time");
-    timestamp.innerText = `[${padDate(date.getDay())}.${padDate(date.getMonth())}.${date.getFullYear()} ${padDate(date.getHours())}:${padDate(date.getMinutes())}]`;
+    timestamp.innerText = `[${padDate(date.getDate())}.${padDate(date.getMonth())}.${date.getFullYear()} ${padDate(date.getHours())}:${padDate(date.getMinutes())}]`;
 
     let message_text = document.createElement("span");
     message_text.innerText = text;
@@ -76,10 +95,7 @@ function padDate(d) {
 function getSelectedDialog() {
     let selected_dialogs = document.getElementsByClassName("dialog-selected");
     if(selected_dialogs.length > 0) {
-        for(let className in selected_dialogs[0].classList) {
-            if(className.startsWith("dialog-id-"))
-                return parseInt(className.replace("dialog-id-", ""));
-        }
+        return parseInt(selected_dialogs[0].id.replace("dialog-id-", ""));
     }
     return CURRENT_DIALOG;
 }
@@ -152,9 +168,8 @@ async function fetchMessages(dialog_id) {
 function selectDialog(dialog_id) {
     if(!(dialog_id in DIALOGS)) return;
 
-    let dialog_to_sel = document.getElementsByClassName(`dialog-id-${dialog_id}`);
+    let dialog_to_sel = document.getElementById(`dialog-id-${dialog_id}`);
     if(!dialog_to_sel) return;
-    dialog_to_sel = dialog_to_sel[0];
 
     for(let dialog of document.getElementsByClassName("dialog-selected")) {
         dialog.classList.remove("dialog-selected");
@@ -195,8 +210,9 @@ async function newDialog() {
     addDialog(jsonResp["id"], jsonResp["username"], "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMafj/HwAGFwLkTJBHPQAAAABJRU5ErkJggg==");
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-    fetchDialogs().then();
+window.addEventListener("DOMContentLoaded", async () => {
+    await fetchDialogs();
+
 }, false);
 
 function _ws_handle_1(data) {
@@ -236,7 +252,7 @@ function initWs() {
             location.href = "/lb1/auth.html";
             return;
         }
-        initWs();
+        setTimeout(initWs, 1000);
     });
 }
 

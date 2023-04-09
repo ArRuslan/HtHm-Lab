@@ -66,3 +66,8 @@ async function register() {
 
     await _processAuthResponse(resp);
 }
+
+window.addEventListener("DOMContentLoaded", async () => {
+    if(localStorage.getItem("token"))
+        location.href = "/lb1/dialogs.html";
+}, false);
