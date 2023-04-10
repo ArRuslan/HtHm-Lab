@@ -35,7 +35,7 @@ async function login() {
     let login = login_input.value.trim();
     let password = password_input.value.trim();
 
-    let resp = await fetch("https://127.0.0.1:8000/api/v1/auth/login", {
+    let resp = await fetch(`${window.API_ENDPOINT}/auth/login`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -56,7 +56,7 @@ async function register() {
         return;
     }
 
-    let resp = await fetch("https://127.0.0.1:8000/api/v1/auth/register", {
+    let resp = await fetch(`${window.API_ENDPOINT}/auth/register`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -67,7 +67,12 @@ async function register() {
     await _processAuthResponse(resp);
 }
 
-window.addEventListener("DOMContentLoaded", async () => {
+if (document.readyState !== 'loading') {
     if(localStorage.getItem("token"))
         location.href = "/dialogs.html";
-}, false);
+} else {
+    window.addEventListener("DOMContentLoaded", async () => {
+        if(localStorage.getItem("token"))
+            location.href = "/dialogs.html";
+    }, false);
+}

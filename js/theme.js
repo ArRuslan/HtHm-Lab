@@ -19,7 +19,7 @@ const _updateTheme = () => {
     }
 };
 
-window.addEventListener("DOMContentLoaded", () => {
+function initTheme() {
     _updateTheme();
     let toggleBtn = document.createElement("a");
     toggleBtn.classList.add("toggle-theme-btn");
@@ -30,7 +30,16 @@ window.addEventListener("DOMContentLoaded", () => {
 
     toggleBtn.appendChild(btn_content);
     document.body.appendChild(toggleBtn);
-}, false);
+}
+
+if (document.readyState !== 'loading') {
+    initTheme();
+} else {
+    window.addEventListener("DOMContentLoaded", () => {
+        initTheme();
+    }, false);
+}
+
 window.addEventListener("storage", (ev) => {
     if(ev.key === "theme")
         _updateTheme();

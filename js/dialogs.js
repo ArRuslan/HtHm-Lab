@@ -14,13 +14,11 @@ function updateDialog(dialog_id) {
 
     let username;
     for(let childNode of dialog.childNodes) {
-        console.log(childNode.nodeName)
         if(childNode.nodeName === "SPAN") {
             username = childNode;
             break;
         }
     }
-    console.log(username)
     if(!username) return;
 
     username.innerText = dialog_obj["username"];
@@ -105,7 +103,7 @@ async function sendMessage() {
     if(!text)
         return;
 
-    let resp = await fetch("https://127.0.0.1:8000/api/v1/chat/messages", {
+    let resp = await fetch(`${window.API_ENDPOINT}/chat/messages`, {
         method: "POST",
         headers: {
             "Authorization": localStorage.getItem("token"),
@@ -134,7 +132,7 @@ message_input.addEventListener("keyup", ({key}) => {
 });
 
 async function fetchDialogs() {
-    let resp = await fetch("https://127.0.0.1:8000/api/v1/chat/dialogs", {
+    let resp = await fetch(`${window.API_ENDPOINT}/chat/dialogs`, {
         headers: {
             "Authorization": localStorage.getItem("token")
         }
@@ -150,7 +148,7 @@ async function fetchDialogs() {
 }
 
 async function fetchMessages(dialog_id) {
-    let resp = await fetch(`https://127.0.0.1:8000/api/v1/chat/messages?dialog_id=${dialog_id}`, {
+    let resp = await fetch(`${window.API_ENDPOINT}/chat/messages?dialog_id=${dialog_id}`, {
         headers: {
             "Authorization": localStorage.getItem("token")
         }
@@ -187,7 +185,7 @@ async function newDialog() {
     let username = prompt("Username:").trim();
     if(!username) return;
 
-    let resp = await fetch("https://127.0.0.1:8000/api/v1/chat/dialogs", {
+    let resp = await fetch(`${window.API_ENDPOINT}/chat/dialogs`, {
         method: "POST",
         headers: {
             "Authorization": localStorage.getItem("token"),
@@ -210,10 +208,13 @@ async function newDialog() {
     addDialog(jsonResp["id"], jsonResp["username"], "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMafj/HwAGFwLkTJBHPQAAAABJRU5ErkJggg==");
 }
 
-window.addEventListener("DOMContentLoaded", async () => {
-    await fetchDialogs();
-
-}, false);
+if (document.readyState !== 'loading') {
+    fetchDialogs().then();
+} else {
+    window.addEventListener("DOMContentLoaded", async () => {
+        await fetchDialogs();
+    }, false);
+}
 
 function _ws_handle_1(data) {
     let dialog = data["dialog"];
@@ -228,7 +229,7 @@ window.WS_HANDLERS = {
 }
 
 function initWs() {
-    window._WS = ws = new WebSocket("wss://127.0.0.1:8000/ws");
+    window._WS = ws = new WebSocket(window.WS_ENDPOINT);
 
     ws.addEventListener("open", (event) => {
         ws.send(JSON.stringify({
@@ -256,6 +257,10 @@ function initWs() {
     });
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+if (document.readyState !== 'loading') {
     initWs();
-}, false);
+} else {
+    window.addEventListener("DOMContentLoaded", () => {
+        initWs();
+    }, false);
+}
