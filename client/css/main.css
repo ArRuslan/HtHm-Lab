@@ -1,9 +1,9 @@
 .theme-dark {
 	/* Telegram colors because why not */
-   --bg-color: #242F3D;
-    --bg-color-rgb: 36, 47, 61;
+   --bg-color: #141420;
+    --bg-color-rgb: 21, 21, 32;
    --bg-color-dialogs: #3B5068;
-   --bg-color-messages: #12213E;
+   --bg-color-messages: #141420;
    --text-color: #7F91A4;
    --dark-text-color: #9AB8CD;
    --gradient-1: #1D69FA;
