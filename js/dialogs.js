@@ -247,8 +247,7 @@ function _ws_handle_new_message(data) {
 
 function _ws_handle_dialog_update(data) {
     let dialog_id = data["id"];
-    DIALOGS[dialog_id]["username"] = "username" in data ? data["username"] : DIALOGS[dialog_id]["username"];
-    DIALOGS[dialog_id]["new_messages"] = "new_messages" in data ? data["new_messages"] : DIALOGS[dialog_id]["new_messages"];
+    Object.assign(DIALOGS[dialog_id], data);
     updateDialog(dialog_id);
 }
 
