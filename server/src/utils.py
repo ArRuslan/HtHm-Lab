@@ -13,7 +13,7 @@ from sqlalchemy import select, and_, or_
 
 from .db import async_session
 from .exceptions import AuthError, RequestError
-from .models.chats import Dialog
+from .models.chats import Dialog, ReadState, Message
 from .models.users import Session
 
 
@@ -154,3 +154,22 @@ class DictList(dict):
         except KeyError:
             super(DictList, self).__setitem__(key, [])
         self[key].append(value)
+
+
+async def newMessages(user_id: int, dialog_id: int) -> bool:
+    async with async_session() as sess:
+        stmt = select(ReadState).where(and_(ReadState.user_id == user_id, ReadState.dialog_id == dialog_id))
+        read_state: ReadState = (await sess.scalars(stmt)).first()
+        if read_state is not None:
+            last_message: Message
+            stmt = select(Message).where(Message.dialog_id == dialog_id).order_by(Message.id.desc()).limit(1)
+            if not (last_message := (await sess.scalars(stmt)).first()):
+                return False
+            if last_message.author_id == user_id:
+                return False
+            if read_state.message_id != last_message.id:
+                return True
+            return False
+        else:
+            return True
+    return False

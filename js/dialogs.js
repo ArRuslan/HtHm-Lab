@@ -25,7 +25,7 @@ function updateDialog(dialog_id) {
     username.style.color = dialog_obj["new_messages"] ? "#ff0000" : "";
 }
 
-function addDialog(dialog_id, username, avatar_url, new_messages=true) {
+function addDialog(dialog_id, username, avatar_url, new_messages) {
     if(dialog_id in DIALOGS) {
         DIALOGS[dialog_id]["username"] = username;
         DIALOGS[dialog_id]["new_messages"] = new_messages;
@@ -61,7 +61,7 @@ function clearMessages() {
 }
 
 function addMessage(dialog_id, message_id, type, text, time) {
-    if(document.getElementsByClassName(`message-id-${message_id}`).length > 0)
+    if(document.getElementsByClassName(`message-id-${message_id}`).length > 0 || message_id < 0)
         return;
     if(getSelectedDialog() !== dialog_id)
         return;
@@ -95,7 +95,7 @@ function getSelectedDialog() {
     if(selected_dialogs.length > 0) {
         return parseInt(selected_dialogs[0].id.replace("dialog-id-", ""));
     }
-    return CURRENT_DIALOG;
+    return window.CURRENT_DIALOG;
 }
 
 async function sendMessage() {
@@ -143,7 +143,7 @@ async function fetchDialogs() {
     }
 
     for(let dialog of await resp.json()) {
-        addDialog(dialog["id"], dialog["username"], "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMafj/HwAGFwLkTJBHPQAAAABJRU5ErkJggg==");
+        addDialog(dialog["id"], dialog["username"], "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMafj/HwAGFwLkTJBHPQAAAABJRU5ErkJggg==", dialog["new_messages"]);
     }
 }
 
@@ -177,8 +177,18 @@ function selectDialog(dialog_id) {
     dialog_title.innerText = DIALOGS[dialog_id].username;
     clearMessages();
 
-    CURRENT_DIALOG = dialog_id;
+    window.CURRENT_DIALOG = dialog_id;
     fetchMessages(dialog_id).then();
+
+    if(DIALOGS[dialog_id]["new_messages"]) {
+        window._WS.send(JSON.stringify({
+            "op": 2,
+            "d": {
+                "dialog_id": getSelectedDialog(),
+                "message_id": -1
+            }
+        }));
+    }
 }
 
 async function newDialog() {
@@ -205,7 +215,7 @@ async function newDialog() {
         return;
     }
 
-    addDialog(jsonResp["id"], jsonResp["username"], "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMafj/HwAGFwLkTJBHPQAAAABJRU5ErkJggg==");
+    addDialog(jsonResp["id"], jsonResp["username"], "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMafj/HwAGFwLkTJBHPQAAAABJRU5ErkJggg==", jsonResp["new_messages"]);
 }
 
 if (document.readyState !== 'loading') {
@@ -216,20 +226,39 @@ if (document.readyState !== 'loading') {
     }, false);
 }
 
-function _ws_handle_1(data) {
+function _ws_handle_new_message(data) {
     let dialog = data["dialog"];
-    addDialog(dialog["id"], dialog["username"], "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMafj/HwAGFwLkTJBHPQAAAABJRU5ErkJggg==");
+    addDialog(dialog["id"], dialog["username"], "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMafj/HwAGFwLkTJBHPQAAAABJRU5ErkJggg==", dialog["new_messages"]);
 
     let message = data["message"];
     addMessage(dialog["id"], message["id"], message["type"], message["text"], message["time"]);
+
+    if(message["type"] !== 0) {
+        if(getSelectedDialog() === dialog["id"])
+            window._WS.send(JSON.stringify({
+                "op": 2,
+                "d": {
+                    "dialog_id": dialog["id"],
+                    "message_id": message["id"]
+                }
+            }));
+    }
+}
+
+function _ws_handle_dialog_update(data) {
+    let dialog_id = data["id"];
+    DIALOGS[dialog_id]["username"] = "username" in data ? data["username"] : DIALOGS[dialog_id]["username"];
+    DIALOGS[dialog_id]["new_messages"] = "new_messages" in data ? data["new_messages"] : DIALOGS[dialog_id]["new_messages"];
+    updateDialog(dialog_id);
 }
 
 window.WS_HANDLERS = {
-    1: _ws_handle_1
+    1: _ws_handle_new_message,
+    3: _ws_handle_dialog_update
 }
 
 function initWs() {
-    window._WS = ws = new WebSocket(window.WS_ENDPOINT);
+    let ws = window._WS = new WebSocket(window.WS_ENDPOINT);
 
     ws.addEventListener("open", (event) => {
         ws.send(JSON.stringify({
@@ -253,7 +282,10 @@ function initWs() {
             location.href = "/auth.html";
             return;
         }
-        setTimeout(initWs, 1000);
+        setTimeout(() => {
+            fetchDialogs().then();
+            initWs();
+        }, 1000);
     });
 }
 

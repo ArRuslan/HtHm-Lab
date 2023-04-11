@@ -10,7 +10,7 @@ from ..exceptions import ValidateError
 from ..gateway import Gateway
 from ..models.chats import Dialog, Message
 from ..models.users import Session, User
-from ..utils import getSession, c_json, getDialog
+from ..utils import getSession, c_json, getDialog, newMessages
 
 chat = Blueprint("chat", __name__)
 
@@ -27,7 +27,8 @@ async def get_dialogs(session: Session):
             other_user = (await sess.scalars(select(User).where(User.id == dialog.other_user(session.user_id)))).first()
             dialogs.append({
                 "id": dialog.id,
-                "username": other_user.login if other_user is not None else "Unknown User"
+                "username": other_user.login if other_user is not None else "Unknown User",
+                "new_messages": await newMessages(session.user_id, dialog.id)
             })
     return c_json(dialogs)
 

@@ -3,13 +3,20 @@ from os import environ
 from typing import Optional
 
 from quart import Websocket
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, update
 
 from .db import async_session
-from .models.chats import Message, Dialog
+from .models.chats import Message, Dialog, ReadState
 from .models.users import Session, User
 from .singleton import Singleton
-from .utils import DictList, JWT
+from .utils import DictList, JWT, newMessages
+
+
+class GatewayOp:
+    IDENTIFY = 0
+    MESSAGE = 1
+    MESSAGE_ACK = 2
+    DIALOG_UPDATE = 3
 
 
 class GatewayClient:
@@ -26,6 +33,29 @@ class GatewayClient:
             if result is None:
                 return 4001
             self.user_id = result.user_id
+
+    async def handle_2(self, data: dict) -> Optional[int]:
+        if not self.user_id:
+            return 4001
+        async with async_session() as sess:
+            if not (dialog := await Dialog.get(data["dialog_id"], self.user_id, session=sess)):
+                return
+            message_id = data.get("message_id", -1)
+            if message_id < 0:
+                stmt = select(Message).where(Message.dialog_id == data["dialog_id"]).order_by(Message.id.desc()).limit(1)
+            else:
+                stmt = select(Message).where(and_(Message.id == message_id, Message.dialog_id == dialog.id))
+            if not (last_message := (await sess.scalars(stmt)).first()):
+                return
+            stmt = select(ReadState).where(and_(ReadState.user_id == self.user_id, ReadState.dialog_id == dialog.id))
+            read_state = (await sess.scalars(stmt)).first()
+            if read_state is None:
+                read_state = ReadState(user_id=self.user_id, dialog_id=dialog.id, message_id=last_message.id)
+                await read_state.create(sess)
+            await sess.execute(update(ReadState).where(and_(ReadState.user_id == self.user_id, ReadState.dialog_id == dialog.id)).values(message_id=last_message.id))
+            await sess.commit()
+
+        await Gateway.getInstance().send_dialog_read_state_update(self.user_id, dialog.id)
 
 
 class Gateway(Singleton):
@@ -46,23 +76,27 @@ class Gateway(Singleton):
                 op_handler = getattr(client, f"handle_{data.get('op', -1)}", None)
                 if op_handler is None:
                     return await self.disconnect(client, 4002) # Wrong op code
-                if res := await op_handler(data.get("d", {})):
-                    return await self.disconnect(client, res)
-                if data['op'] == 0:
+                try:
+                    if res := await op_handler(data.get("d", {})):
+                        return await self.disconnect(client, res)
+                except:
+                    return await self.disconnect(client, 4005)
+                if data['op'] == GatewayOp.IDENTIFY:
                     self.clients[client.user_id] = client
             except CancelledError:
                 return await self.disconnect(client, 0)
 
     async def send_message(self, user_id: int, dialog: Dialog, message: Message) -> None:
-        for client in self.clients.get(user_id):
+        for client in self.clients.get(user_id, []):
             async with async_session() as sess:
                 other_user = (await sess.scalars(select(User).where(User.id == dialog.other_user(user_id)))).first()
             await client.ws.send_json({
-                "op": 1,
+                "op": GatewayOp.MESSAGE,
                 "d": {
                     "dialog": {
                         "id": dialog.id,
-                        "username": other_user.login if other_user is not None else "Unknown User"
+                        "username": other_user.login if other_user is not None else "Unknown User",
+                        "new_messages": await newMessages(user_id, dialog.id)
                     },
                     "message": {
                         "type": 1 if message.author_id != user_id else 0,
@@ -70,5 +104,15 @@ class Gateway(Singleton):
                         "id": message.id,
                         "time": message.created_at*1000
                     }
+                }
+            })
+
+    async def send_dialog_read_state_update(self, user_id: int, dialog_id: int) -> None:
+        for client in self.clients.get(user_id, []):
+            await client.ws.send_json({
+                "op": GatewayOp.DIALOG_UPDATE,
+                "d": {
+                    "id": dialog_id,
+                    "new_messages": await newMessages(user_id, dialog_id)
                 }
             })

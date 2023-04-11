@@ -1,5 +1,10 @@
+// Production enviroment
 window.API_ENDPOINT = "https://idkchat-api.pepega.ml/api/v1";
 window.WS_ENDPOINT = "wss://idkchat-api.pepega.ml/ws";
+
+// Local enviroment
+/*window.API_ENDPOINT = "https://127.0.0.1:8000/api/v1";
+window.WS_ENDPOINT = "wss://127.0.0.1:8000/ws";*/
 
 
 // Solution to not working DOMContentLoaded on Cloudflare when both HTML Minify and Rocker Loader are on.
