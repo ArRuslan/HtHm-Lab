@@ -28,7 +28,9 @@ async def get_dialogs(session: Session):
             dialogs.append({
                 "id": dialog.id,
                 "username": other_user.login if other_user is not None else "Unknown User",
-                "new_messages": await newMessages(session.user_id, dialog.id)
+                "new_messages": await newMessages(session.user_id, dialog.id),
+                "user_id": other_user.id if other_user is not None else None,
+                "avatar": other_user.avatar if other_user is not None else None,
             })
     return c_json(dialogs)
 
@@ -51,7 +53,9 @@ async def create_dialog(session: Session, data: DialogCreate):
         if dialog is not None:
             return c_json({
                 "id": dialog.id,
-                "username": other_user.login
+                "username": other_user.login,
+                "user_id": other_user.id if other_user is not None else None,
+                "avatar": other_user.avatar
             })
 
         dialog = Dialog(user_1=session.user_id, user_2=other_user.id)
@@ -67,7 +71,8 @@ async def create_dialog(session: Session, data: DialogCreate):
 
     return c_json({
         "id": dialog.id,
-        "username": other_user.login
+        "username": other_user.login,
+        "avatar": other_user.avatar
     })
 
 

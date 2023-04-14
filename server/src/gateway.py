@@ -96,6 +96,8 @@ class Gateway(Singleton):
                     "dialog": {
                         "id": dialog.id,
                         "username": other_user.login if other_user is not None else "Unknown User",
+                        "user_id": other_user.id if other_user is not None else None,
+                        "avatar": other_user.avatar if other_user is not None else None,
                         "new_messages": await newMessages(user_id, dialog.id)
                     },
                     "message": {
@@ -114,5 +116,17 @@ class Gateway(Singleton):
                 "d": {
                     "id": dialog_id,
                     "new_messages": await newMessages(user_id, dialog_id)
+                }
+            })
+
+    async def send_dialog_update(self, user_id: int, dialog_id: int, **data) -> None:
+        if not data:
+            return
+        for client in self.clients.get(user_id, []):
+            await client.ws.send_json({
+                "op": GatewayOp.DIALOG_UPDATE,
+                "d": {
+                    "id": dialog_id,
+                    **data
                 }
             })

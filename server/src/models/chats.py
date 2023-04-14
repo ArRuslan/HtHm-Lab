@@ -15,7 +15,7 @@ class Dialog(Base):
     user_2: int = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
 
     def __repr__(self) -> str:
-        return f"<Dialog id={self.id} users=[{self.user_1}, {self.user_2}]>"
+        return f"Dialog(id={self.id!r}, user_1={self.user_1!r}, user_2={self.user_2!r})"
 
     def other_user(self, current_user_id: int) -> int:
         return self.user_1 if current_user_id == self.user_2 else self.user_2
@@ -48,7 +48,7 @@ class Message(Base):
     text: str = Column(String)
 
     def __repr__(self) -> str:
-        return f"<Message id={self.id} dialog_id={self.dialog_id} author={self.author} text={self.text[:16]}>"
+        return f"Message(id={self.id!r}, dialog_id={self.dialog_id!r}, author={self.author!r}, text={self.text[:16]!r})"
 
 
 class ReadState(Base):
@@ -57,3 +57,6 @@ class ReadState(Base):
     dialog_id: int = Column(Integer, ForeignKey("dialogs.id", ondelete="CASCADE"), primary_key=True)
     user_id: int = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
     message_id: int = Column(Integer)
+
+    def __repr__(self) -> str:
+        return f"ReadState(user_id={self.user_id!r}, dialog_id={self.dialog_id!r}, message_id={self.message_id!r})"

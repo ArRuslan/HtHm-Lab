@@ -12,17 +12,43 @@ function updateDialog(dialog_id) {
     let dialog = document.getElementById(`dialog-id-${dialog_id}`);
     if(!dialog || !dialog_obj) return;
 
-    let username;
+    let username, avatar;
     for(let childNode of dialog.childNodes) {
         if(childNode.nodeName === "SPAN") {
             username = childNode;
-            break;
         }
+        if(childNode.nodeName === "IMG") {
+            avatar = childNode;
+        }
+        if(username && avatar) break;
     }
-    if(!username) return;
+    if(!username || !avatar) return;
 
     username.innerText = dialog_obj["username"];
     username.style.color = dialog_obj["new_messages"] ? "#ff0000" : "";
+
+    console.log(dialog_obj)
+
+    avatar.src = dialog_obj["avatar"] ? avatarUrl(dialog_obj["user_id"], dialog_obj["avatar"]) : DEFAULT_AVATAR;
+    ensureImageLoaded(avatar, DEFAULT_AVATAR);
+}
+
+function ensureImageLoaded(image_element, default_src) {
+    image_element.dataset.load_tries = "0";
+    image_element.onerror = () => {
+        setTimeout(() => {
+            if(+image_element.dataset.load_tries > 5) {
+                image_element.dataset.load_tries = "0";
+                image_element.src = default_src;
+                return;
+            }
+            image_element.dataset.load_tries = (+image_element.dataset.load_tries+1).toString();
+            image_element.src = image_element.src+(image_element.src.includes("?") ? "&" : "?")+`_C=${new Date().getTime()}`;
+        }, 500);
+    }
+    image_element.onload = () => {
+        image_element.dataset.load_tries = "0";
+    }
 }
 
 function addDialog(dialog_id, username, avatar_url, new_messages) {
@@ -43,6 +69,7 @@ function addDialog(dialog_id, username, avatar_url, new_messages) {
     avatar_img.src = avatar_url;
     avatar_img.width = 32;
     avatar_img.height = 32;
+    ensureImageLoaded(avatar_img, DEFAULT_AVATAR);
 
     let name = document.createElement("span");
     name.innerText = username;
@@ -143,7 +170,12 @@ async function fetchDialogs() {
     }
 
     for(let dialog of await resp.json()) {
-        addDialog(dialog["id"], dialog["username"], "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMafj/HwAGFwLkTJBHPQAAAABJRU5ErkJggg==", dialog["new_messages"]);
+        addDialog(
+            dialog["id"],
+            dialog["username"],
+            dialog["avatar"] ? avatarUrl(dialog["user_id"], dialog["avatar"]) : DEFAULT_AVATAR,
+            dialog["new_messages"]);
+        Object.assign(DIALOGS[dialog["id"]], dialog);
     }
 }
 
@@ -228,7 +260,11 @@ if (document.readyState !== 'loading') {
 
 function _ws_handle_new_message(data) {
     let dialog = data["dialog"];
-    addDialog(dialog["id"], dialog["username"], "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMafj/HwAGFwLkTJBHPQAAAABJRU5ErkJggg==", dialog["new_messages"]);
+    addDialog(
+        dialog["id"],
+        dialog["username"],
+        data["avatar"] ? avatarUrl(data["user_id"], data["avatar"]) : DEFAULT_AVATAR,
+        dialog["new_messages"]);
 
     let message = data["message"];
     addMessage(dialog["id"], message["id"], message["type"], message["text"], message["time"]);

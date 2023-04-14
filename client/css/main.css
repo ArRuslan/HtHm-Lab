@@ -1,24 +1,21 @@
 .theme-dark {
-	/* Telegram colors because why not */
-   --bg-color: #141420;
+    --bg-color: #141420;
     --bg-color-rgb: 21, 21, 32;
-   --bg-color-dialogs: #3B5068;
-   --bg-color-messages: #141420;
-   --text-color: #7F91A4;
-   --dark-text-color: #9AB8CD;
-   --gradient-1: #1D69FA;
-   --gradient-2: #C623FF;
+    --bg-color-messages: #141420;
+    --text-color: #7F91A4;
+    --dark-text-color: #9AB8CD;
+    --gradient-1: #1D69FA;
+    --gradient-2: #C623FF;
 }
 
 .theme-light {
-   --bg-color: #74B4E0;
-   --bg-color-rgb: 116, 180, 224;
-   --bg-color-dialogs: #D8EDFF;
-   --bg-color-messages: #9AD0EA;
-   --text-color: #132451;
-   --dark-text-color: #131541;
-   --gradient-1: #1D69FA;
-   --gradient-2: #C623FF;
+    --bg-color: #74B4E0;
+    --bg-color-rgb: 116, 180, 224;
+    --bg-color-messages: #9AD0EA;
+    --text-color: #132451;
+    --dark-text-color: #131541;
+    --gradient-1: #1D69FA;
+    --gradient-2: #C623FF;
 }
 
 body {
@@ -31,13 +28,13 @@ body {
 
 @keyframes gb-gradient-animation {
     0% {
-        background-position: 0% 50%;
+        background-position: 0 50%;
     }
     50% {
         background-position: 100% 50%;
     }
     100% {
-        background-position: 0% 50%;
+        background-position: 0 50%;
     }
 }
 

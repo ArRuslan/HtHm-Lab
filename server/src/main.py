@@ -1,4 +1,5 @@
 from asyncio import CancelledError
+from os import environ
 
 from quart import Quart, Response, websocket
 from quart_schema import QuartSchema, RequestSchemaValidationError
@@ -6,12 +7,14 @@ from quart_schema import QuartSchema, RequestSchemaValidationError
 from .db import init_db
 from .exceptions import RequestError
 from .gateway import Gateway
-from .routes import auth, chat
+from .routes import auth, chat, users
+from .storage import S3Storage
 from .utils import c_json
 
 app = Quart("IdkChat")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite+aiosqlite:///idkchat.db"
 gw = Gateway()
+storage = S3Storage(environ["S3_GATEWAY"], environ["S3_ID"], environ["S3_KEY"], environ["S3_BUCKET"])
 
 QuartSchema(app)
 
@@ -43,6 +46,7 @@ async def set_cors_headers(response: Response) -> Response:
 
 app.register_blueprint(auth.auth, url_prefix="/api/v1/auth")
 app.register_blueprint(chat.chat, url_prefix="/api/v1/chat")
+app.register_blueprint(users.users, url_prefix="/api/v1/users")
 
 
 @app.websocket("/ws")
