@@ -1,6 +1,7 @@
 const avatar_img = document.getElementById("avatar-img");
 const logout_btn = document.getElementById("logout-button");
 const username_span = document.getElementById("username");
+const avatar_remove_btn = document.getElementById("avatar-remove-button");
 
 logout_btn.addEventListener("click", () => {
     localStorage.removeItem("token");
@@ -28,8 +29,12 @@ avatar_img.addEventListener("click", () => {
     input.click();
 });
 
+avatar_remove_btn.addEventListener("click", async () => {
+    await uploadAvatar(null);
+});
+
 async function uploadAvatar(avatar_b64) {
-    if(!avatar_b64) return;
+    if(!avatar_b64 && avatar_b64 !== null) return;
     let resp = await fetch(`${window.API_ENDPOINT}/users/@me`, {
         method: "PATCH",
         headers: {

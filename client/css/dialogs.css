@@ -24,6 +24,7 @@
 
 .dialog {
     padding-top: 10px !important;
+    padding-bottom: 10px !important;
     padding-left: 10px !important;
     right: 10px;
     float: left;
@@ -184,5 +185,5 @@
 }
 
 .dialog-selected {
-    background-color: var(--bg-color-messages);
+    background-color: rgb(var(--gradient-2-rgb), .25);
 }

@@ -50,7 +50,7 @@ async def edit_me(data: EditProfile, session: Session):
 
             if data.avatar is not None:
                 image = getImage(data.avatar)
-                if (avatar_hash := await S3Storage.getInstance().setAvatar(user.id, image, 256)) is None:
+                if (avatar_hash := await S3Storage.getInstance().setAvatar(user.id, image, 512)) is None:
                     data.avatar = user.avatar
                 else:
                     data.avatar = avatar_hash
