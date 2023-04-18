@@ -8,11 +8,25 @@ class User(Base):
 
     id: int = Column(Integer, primary_key=True, autoincrement=True)
     login: str = Column(String, unique=True, nullable=False)
-    password: str = Column(String, nullable=False)
+    salt: str = Column(String, nullable=False)
+    verifier: str = Column(String, nullable=False)
+    privKey: str = Column(String, nullable=False)
+    pubKey: str = Column(String, nullable=False)
     avatar: str = Column(String, nullable=True, default=None)
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, login={self.login!r}, avatar={self.avatar!r})"
+
+
+class PendingAuth(Base):
+    __tablename__ = "pending_auth"
+    id: int = Column(Integer, primary_key=True, autoincrement=True)
+    pubB: str = Column(String, nullable=False)
+    privB: str = Column(String, nullable=False)
+    expire_timestamp: int = Column(Integer, nullable=False)
+
+    def __repr__(self) -> str:
+        return f"PendingAuth(id={self.id!r}, expire_timestamp={self.expire_timestamp!r})"
 
 
 class Session(Base):

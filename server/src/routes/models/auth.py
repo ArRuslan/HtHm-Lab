@@ -9,7 +9,10 @@ from ...exceptions import ValidateError
 
 class Register(BaseModel):
     login: str
-    password: str
+    salt: str
+    verifier: str
+    privKey: str
+    pubKey: str
 
     @validator("login")
     def validate_login(cls: Register, value: str) -> str:
@@ -21,15 +24,11 @@ class Register(BaseModel):
             raise ValidateError("Username length must be 5 or greater!")
         return value
 
-    @validator("password")
-    def validate_password(cls: Register, value: str) -> str:
-        value = value.strip()
-        if not value:
-            raise ValidateError("Invalid password!")
-        if len(value) < 8:
-            raise ValidateError("Password length must be 8 or greater!")
-        return value
 
+class LoginStart(BaseModel):
+    login: str
 
-class Login(Register):
-    pass
+class Login(BaseModel):
+    A: str
+    M: str
+    ticket: str

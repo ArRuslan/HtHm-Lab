@@ -1,3 +1,5 @@
+const exports = {};
+
 function isLocalNetwork(hostname = window.location.hostname) {
     return (
         (['localhost', '127.0.0.1', '', '::1'].includes(hostname))
@@ -35,4 +37,15 @@ if (document.readyState === "loading") {
 function avatarUrl(user_id, avatar_hash) {
     let ext = avatar_hash.startsWith("a_") ? "gif" : "png";
     return `${CDN}/avatars/${user_id}/${avatar_hash}.${ext}?${window.AVATAR_QUERY}`;
+}
+
+function sortedIndex(array, value) {
+    let low = 0, high = array.length;
+
+    while (low < high) {
+        let mid = (low + high) >>> 1;
+        if (array[mid] < value) low = mid + 1;
+        else high = mid;
+    }
+    return low;
 }

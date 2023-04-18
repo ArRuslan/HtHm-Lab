@@ -1,3 +1,4 @@
+from random import shuffle
 from time import time
 
 from quart import Blueprint

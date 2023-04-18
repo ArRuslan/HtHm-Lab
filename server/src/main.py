@@ -31,6 +31,15 @@ async def handle_idkchat_validation_error(error: RequestError):
 
 @app.errorhandler(RequestSchemaValidationError)
 async def handle_validation_error(error: RequestSchemaValidationError):
+    for error in error.validation_error.errors():
+        loc = error["loc"][0]
+        if error["type"] == "value_error.missing":
+            return c_json({"message": f"Required field: {loc}."}, 400)
+        elif error["type"] in ("type_error.integer", "type_error.float"):
+            message = "Value is not int" if error["type"] == "type_error.integer" else "Value is not float"
+            return c_json({"message": f"{message}: {loc}."}, 400)
+        else:
+            return c_json({"message": f"Something wrong with this value: {loc}."}, 400)
     return c_json({"message": "Something wrong with data you provided!"}, 400)
 
 
