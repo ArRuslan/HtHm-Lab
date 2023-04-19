@@ -78,6 +78,7 @@ async def login(data: Login):
         srp.b = int(pauth.privB, 16)
         srp.B = int(pauth.pubB, 16)
         await sess.execute(delete(PendingAuth).where(PendingAuth.id == pauth.id))
+        await sess.commit()
 
         if not (HAMK := srp.verifyChallenge(int("0x" + data.A, 16), int("0x" + data.M, 16))):
             raise AuthError("Invalid login or/and password!")
