@@ -98,7 +98,8 @@ class Gateway(Singleton):
                         "username": other_user.login if other_user is not None else "Unknown User",
                         "user_id": other_user.id if other_user is not None else None,
                         "avatar": other_user.avatar if other_user is not None else None,
-                        "new_messages": await newMessages(user_id, dialog.id)
+                        "new_messages": await newMessages(user_id, dialog.id),
+                        "public_key": other_user.pubKey,
                     },
                     "message": {
                         "type": 1 if message.author_id != user_id else 0,

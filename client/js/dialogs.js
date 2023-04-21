@@ -2,12 +2,48 @@ const dialogs = document.getElementById("dialogs");
 const dialog_title = document.getElementById("dialog-title");
 const messages = document.getElementById("messages");
 const message_input = document.getElementById("message-input");
+const crypt = new OpenCrypto();
 
 window.DIALOGS = {};
 window.MESSAGES = [];
 window.MESSAGES_CACHE = {};
 window.CURRENT_DIALOG = 0;
 window._WS = null;
+
+async function encryptMessage(text, publicKey) {
+    let buffer = new TextEncoder().encode(text);
+    let chunkSize = publicKey.algorithm.modulusLength/8-2;
+    switch(publicKey.algorithm.hash.name.toLowerCase()) {
+        case "sha-512":
+        case "sha-384":
+            chunkSize -= 64 * 2; break;
+        case "sha-256":
+            chunkSize -= 32 * 2; break;
+        case "sha-1":
+            chunkSize -= 20 * 2; break;
+    }
+    let outBuffers = [];
+    for (let i = 0; i < buffer.length; i += chunkSize) {
+        let chunk = buffer.slice(i, i + chunkSize);
+        let encryptedChunk = await window.crypto.subtle.encrypt({"name": "RSA-OAEP"}, publicKey, chunk)
+        outBuffers.push(new Uint8Array(encryptedChunk));
+    }
+    return crypt.encodeAb(concatUint8Arrays(outBuffers));
+}
+
+async function decryptMessage(message, privKey) {
+    message = new Uint8Array(crypt.decodeAb(message));
+    let chunkSize = privKey.algorithm.modulusLength/8;
+    let out = "";
+    console.log(message)
+    for (let i = 0; i < message.length; i += chunkSize) {
+        let chunk = message.slice(i, i + chunkSize);
+        let decryptedChunk = await window.crypto.subtle.decrypt({"name": "RSA-OAEP"}, privKey, chunk);
+        console.log(decryptedChunk)
+        out += new TextDecoder("utf8").decode(decryptedChunk);
+    }
+    return out;
+}
 
 function updateDialog(dialog_id) {
     let dialog_obj = DIALOGS[dialog_id];
@@ -51,17 +87,18 @@ function ensureImageLoaded(image_element, default_src) {
     }
 }
 
-function addDialog(dialog_id, username, avatar_url, new_messages) {
+function addDialog(dialog_id, username, avatar_url, new_messages, public_key) {
     if(!(dialog_id in MESSAGES_CACHE)) {
         MESSAGES_CACHE[dialog_id] = {"messages": [], "message_ids": []};
     }
     if(dialog_id in DIALOGS) {
         DIALOGS[dialog_id]["username"] = username;
         DIALOGS[dialog_id]["new_messages"] = new_messages;
+        DIALOGS[dialog_id]["publicKey"] = public_key ? public_key : DIALOGS[dialog_id]["publicKey"];
         updateDialog(dialog_id);
         return;
     }
-    DIALOGS[dialog_id] = {"username": username, "avatar_url": avatar_url, "dialog_id": dialog_id, "new_messages": new_messages};
+    DIALOGS[dialog_id] = {"username": username, "avatar_url": avatar_url, "dialog_id": dialog_id, "new_messages": new_messages, "publicKey": public_key};
 
     let dialog = document.createElement("li");
     dialog.classList.add("dialog");
@@ -99,6 +136,8 @@ function addMessage(dialog_id, message_id, type, text, time) {
         return;
     if(document.getElementById(`message-id-${message_id}`))
         return;
+
+    if(!text) return;
 
     let idx = sortedIndex(MESSAGES, message_id);
     MESSAGES.splice(idx, 0, message_id);
@@ -146,8 +185,11 @@ function getSelectedDialog() {
 
 async function sendMessage() {
     let text = message_input.value.trim();
-    if(!text)
-        return;
+    if(!text) return;
+    if(!getSelectedDialog()) return;
+
+    let pubKey = DIALOGS[getSelectedDialog()]["publicKey"];
+    text = await encryptMessage(text, pubKey);
 
     let resp = await fetch(`${window.API_ENDPOINT}/chat/messages`, {
         method: "POST",
@@ -193,7 +235,9 @@ async function fetchDialogs() {
             dialog["id"],
             dialog["username"],
             dialog["avatar"] ? avatarUrl(dialog["user_id"], dialog["avatar"]) : DEFAULT_AVATAR,
-            dialog["new_messages"]);
+            dialog["new_messages"],
+            await crypt.pemPublicToCrypto(dialog["public_key"], { name: 'RSA-OAEP' })
+        );
         Object.assign(DIALOGS[dialog["id"]], dialog);
     }
 }
@@ -209,8 +253,9 @@ async function fetchMessages(dialog_id) {
         location.href = "/auth.html";
     }
 
+    let privKey = await crypt.decryptPrivateKey(localStorage.getItem("encPrivKey"), localStorage.getItem("KEY"), { name: 'RSA-OAEP' });
     for(let message of await resp.json()) {
-        addMessage(dialog_id, message["id"], message["type"], message["text"], message["time"]);
+        addMessage(dialog_id, message["id"], message["type"], await decryptMessage(message["text"], privKey), message["time"]);
     }
 }
 
@@ -270,7 +315,13 @@ async function newDialog() {
         return;
     }
 
-    addDialog(jsonResp["id"], jsonResp["username"], "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMafj/HwAGFwLkTJBHPQAAAABJRU5ErkJggg==", jsonResp["new_messages"]);
+    addDialog(
+        jsonResp["id"],
+        jsonResp["username"],
+        jsonResp["avatar"] ? avatarUrl(jsonResp["user_id"], jsonResp["avatar"]) : DEFAULT_AVATAR,
+        jsonResp["new_messages"],
+        await crypt.pemPublicToCrypto(jsonResp["public_key"], { name: 'RSA-OAEP' })
+    );
 }
 
 if (document.readyState !== 'loading') {
@@ -281,16 +332,19 @@ if (document.readyState !== 'loading') {
     }, false);
 }
 
-function _ws_handle_new_message(data) {
+async function _ws_handle_new_message(data) {
     let dialog = data["dialog"];
     addDialog(
         dialog["id"],
         dialog["username"],
         data["avatar"] ? avatarUrl(data["user_id"], data["avatar"]) : DEFAULT_AVATAR,
-        dialog["new_messages"]);
+        dialog["new_messages"],
+        await crypt.pemPublicToCrypto(dialog["public_key"], { name: 'RSA-OAEP' })
+    );
 
     let message = data["message"];
-    addMessage(dialog["id"], message["id"], message["type"], message["text"], message["time"]);
+    let privKey = await crypt.decryptPrivateKey(localStorage.getItem("encPrivKey"), localStorage.getItem("KEY"), { name: 'RSA-OAEP' });
+    addMessage(dialog["id"], message["id"], message["type"], await decryptMessage(message["text"], privKey), message["time"]);
 
     if(message["type"] !== 0) {
         if(getSelectedDialog() === dialog["id"])
@@ -304,7 +358,7 @@ function _ws_handle_new_message(data) {
     }
 }
 
-function _ws_handle_dialog_update(data) {
+async function _ws_handle_dialog_update(data) {
     let dialog_id = data["id"];
     Object.assign(DIALOGS[dialog_id], data);
     updateDialog(dialog_id);
@@ -330,7 +384,7 @@ function initWs() {
     ws.addEventListener("message", (event) => {
         const data = JSON.parse(event.data);
         if(data["op"] in WS_HANDLERS) {
-            WS_HANDLERS[data["op"]](data["d"])
+            WS_HANDLERS[data["op"]](data["d"]).then();
         }
     });
 

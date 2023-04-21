@@ -32,6 +32,7 @@ async def get_dialogs(session: Session):
                 "new_messages": await newMessages(session.user_id, dialog.id),
                 "user_id": other_user.id if other_user is not None else None,
                 "avatar": other_user.avatar if other_user is not None else None,
+                "public_key": other_user.pubKey,
             })
     return c_json(dialogs)
 
@@ -42,7 +43,7 @@ async def get_dialogs(session: Session):
 async def create_dialog(session: Session, data: DialogCreate):
     async with async_session() as sess:
         stmt = select(User).where(User.login == data.username)
-        other_user = (await sess.scalars(stmt)).first()
+        other_user: User = (await sess.scalars(stmt)).first()
         if other_user is None:
             raise ValidateError("No users with this username exists!")
 
@@ -56,12 +57,14 @@ async def create_dialog(session: Session, data: DialogCreate):
                 "id": dialog.id,
                 "username": other_user.login,
                 "user_id": other_user.id if other_user is not None else None,
-                "avatar": other_user.avatar
+                "avatar": other_user.avatar,
+                "public_key": other_user.pubKey,
             })
 
         dialog = Dialog(user_1=session.user_id, user_2=other_user.id)
         await dialog.create(sess)
 
+        pubKey = ...
         message = Message(dialog_id=dialog.id, author_id=session.user_id, text="Dialog started!", created_at=int(time()))
         await message.create(sess)
 
@@ -73,7 +76,9 @@ async def create_dialog(session: Session, data: DialogCreate):
     return c_json({
         "id": dialog.id,
         "username": other_user.login,
-        "avatar": other_user.avatar
+        "user_id": other_user.id if other_user is not None else None,
+        "avatar": other_user.avatar,
+        "public_key": other_user.pubKey,
     })
 
 

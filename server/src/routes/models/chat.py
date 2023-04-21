@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from base64 import b64decode
 from typing import Optional
 
 from pydantic import BaseModel, validator
@@ -26,7 +27,13 @@ class MessagePost(BaseModel):
         value = value.strip()
         if not value:
             raise ValidateError("Message is empty!")
-        return value[:1024]
+        try:
+            raw = b64decode(value.encode("utf8"))
+            assert len(raw) <= 2048
+            assert raw % 256 == 0
+        except:
+            raise ValidateError("Invalid message!")
+        return value
 
 
 class DialogCreate(BaseModel):
