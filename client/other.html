@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="IdkChat - simple and minimalistic chat app.">
+  <meta name="keywords" content="idkchat,chat,simple,minimalistic,real-time">
+  <meta name="author" content="RuslanUC">
+  <title>Інші завдання</title>
+  <link rel="stylesheet" type="text/css" href="/css/main.css">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style> /* Глобальні стилі */
+    * {
+      padding-bottom: 5px;
+    }
+
+    #colored-text-with-colored-bg {
+      background-color: #00ff0080;
+      color: blue;
+    }
+
+    .box-with-shadow {
+      border: 2px solid;
+      box-shadow: 20px 10px 5px crimson;
+      width: 250px;
+      height: 250px;
+
+      text-align: center;
+    }
+
+    table, td {
+      border: 1px solid;
+    }
+
+    th, td {
+      padding: 10px;
+    }
+
+    :target {
+      background-color: #00ffff60;
+    }
+  </style>
+</head>
+<body class="theme-dark">
+  <main class="content">
+    <h1 style="text-align: center">Завдання, для яких я не знайшов місця у основних 4 сторінках.</h1>
+
+    <a href="#other-place-in-current-document">Гіперпосилання на інше місце в поточному документі</a><br><br>
+
+    <br>
+
+    <div>
+      Списки:
+      <ul>
+        <li>Це</li>
+        <li>Маркований</li>
+        <li>Список</li>
+      </ul>
+      <ol>
+        <li>Це</li>
+        <li>Нумерований</li>
+        <li>Список</li>
+      </ol>
+      <ol>
+        <li>Це</li>
+        <li>Нумерований</li>
+        <li>Список</li>
+        <ul>
+          <li>Це</li>
+          <li>Маркований</li>
+          <li>Список</li>
+          <li>Який</li>
+          <li>Вкладений</li>
+          <li>У</li>
+          <li>Нумерований</li>
+        </ul>
+      </ol>
+    </div>
+
+    <br>
+
+    <div>
+      Мітки:<br>
+      <label>Просто мітка</label><br>
+      <label for="input-for-label">Мітка з текстовим полем</label>
+      <input id="input-for-label">
+    </div>
+
+    <div>
+      Кольори тексту:
+      <p style="color: red;">Червоний текст</p>
+      <p id="colored-text-with-colored-bg">Синій текст з напівпрозорим зеленим фоном</p>
+    </div>
+
+    <div>
+      Embed фрейм:<br>
+      <embed type="video/mp4" src="/video/sample_video_30s.mp4" width="480" height="320"><br><br>
+      Аудіо (радіо HitFm):<br>
+      <audio src="https://online.hitfm.ua/HitFM" controls id="audio-radio"></audio>
+    </div>
+
+    <div class="box-with-shadow">
+      Елемент з тінню
+    </div>
+
+    <div id="other-place-in-current-document" style="margin-top: 20px; text-align: center">
+      <b>Інше місце в поточному документі</b>
+    </div>
+
+    <div>
+      <table>
+        <tr>
+          <th>Заголовок 1</th>
+          <th>Заголовок 2</th>
+          <th>Заголовок 3</th>
+          <th>Заголовок 4</th>
+          <th>Заголовок 5</th>
+        </tr>
+        <tr>
+          <td>Ряд 1, клітинка 1</td>
+          <td>Ряд 1, клітинка 2</td>
+          <td>Ряд 1, клітинка 3</td>
+          <td>Ряд 1, клітинка 4</td>
+          <td>Ряд 1, клітинка 5</td>
+        </tr>
+        <tr>
+          <td>Ряд 2, клітинка 1</td>
+          <td>Ряд 2, клітинка 2</td>
+          <td>Ряд 2, клітинка 3</td>
+          <td>Ряд 2, клітинка 4</td>
+          <td>Ряд 2, клітинка 5</td>
+        </tr>
+        <tr>
+          <td>Ряд 3, клітинка 1</td>
+          <td>Ряд 3, клітинка 2</td>
+          <td>Ряд 3, клітинка 3</td>
+          <td>Ряд 3, клітинка 4</td>
+          <td>Ряд 3, клітинка 5</td>
+        </tr>
+        <tr>
+          <td>Ряд 4, клітинка 1</td>
+          <td>Ряд 4, клітинка 2</td>
+          <td>Ряд 4, клітинка 3</td>
+          <td>Ряд 4, клітинка 4</td>
+          <td>Ряд 4, клітинка 5</td>
+        </tr>
+        <tr>
+          <td>Ряд 5, клітинка 1</td>
+          <td>Ряд 5, клітинка 2</td>
+          <td>Ряд 5, клітинка 3</td>
+          <td>Ряд 5, клітинка 4</td>
+          <td>Ряд 5, клітинка 5</td>
+        </tr>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    let r = document.getElementById("audio-radio");
+    r.volume = 0.05;
+  </script>
+</body>
+</html>
