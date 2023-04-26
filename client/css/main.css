@@ -39,7 +39,7 @@ body {
     }
 }
 
-aside.right {
+aside .right {
     padding-left: 0.5rem;
     margin-left: 0.5rem;
     float: right;
