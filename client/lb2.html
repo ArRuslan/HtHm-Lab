@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lb2</title>
+  <link rel="stylesheet" type="text/css" href="/css/lb2.css">
+  <link rel="stylesheet" type="text/css" href="/css/main.css">
+</head>
+<body class="theme-dark">
+  <main class="block-content">
+    <h1 style="text-align: center">Завдання лабораторної роботи №2.</h1>
+
+    <div>
+      Годинник:
+      <div class="clock">
+        <div class="hour"></div>
+        <div class="minute"></div>
+        <div class="second"></div>
+        <div class="center-dot"></div>
+      </div>
+      <label for="clockSpeed">Швидкість:</label>
+      <input type="range" min="1" max="60" value="1" id="clockSpeed" oninput="document.querySelector(':root').style.setProperty('--clock-speed', this.value)">
+    </div>
+
+    <br>
+    <br>
+
+    <div>
+      Індикатор прогресу:
+      <div class="progress-indicator">
+        <div class="progress-completed"></div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

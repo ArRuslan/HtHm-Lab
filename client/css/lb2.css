@@ -1,0 +1,92 @@
+:root {
+    --clock-speed: 1;
+}
+
+.clock {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 1px black solid;
+}
+
+.hour,
+.minute,
+.second {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-origin: bottom center;
+}
+
+.hour {
+    width: 6px;
+    height: 50px;
+    background-color: #00f;
+    transform: translate(-50%, -100%) rotate(0deg);
+    animation: clock-animation calc(86400s / var(--clock-speed)) linear infinite;
+}
+
+.minute {
+    width: 4px;
+    height: 70px;
+    background-color: #0f0;
+    transform: translate(-50%, -100%) rotate(0deg);
+    animation: clock-animation calc(3600s / var(--clock-speed)) linear infinite;
+}
+
+.second {
+    width: 2px;
+    height: 80px;
+    background-color: #f00;
+    transform: translate(-50%, -100%) rotate(0deg);
+    animation: clock-animation calc(60s / var(--clock-speed)) linear infinite;
+}
+
+@keyframes clock-animation {
+    0% {
+        transform: translate(-50%, -100%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -100%) rotate(360deg);
+    }
+}
+
+.center-dot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #000;
+    transform: translate(-50%, -50%);
+}
+
+
+
+.progress-indicator {
+    width: 100%;
+    height: 20px;
+    background-color: #7F91A4;
+    border: 1px #1D69FA solid;
+    text-align: center;
+    color: #fff;
+}
+
+.progress-completed {
+    background-color: #00CC60;
+    width: 0;
+    height: 100%;
+    animation: progress-animation 10s linear infinite;
+}
+
+@keyframes progress-animation {
+    0% {
+        width: 0;
+    }
+    100% {
+        width: 100%;
+    }
+}
