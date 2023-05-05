@@ -14,9 +14,9 @@
     <script src="/js/main.js"></script>
 </head>
 <body class="theme-dark">
-    <main class="content content-dialogs grid-container" style="height: 90vh;">
+    <main class="block-content content-dialogs grid-container" style="height: 90vh;">
         <div class="dialog-add">
-            <button onclick="newDialog();">Add</button>
+            <button class="dialog-add__button" onclick="newDialog();">Add</button>
         </div>
 
         <div class="dialogs-list">
@@ -32,15 +32,15 @@
         </div>
 
         <div class="dialog-input">
-            <input type="text" name="message" placeholder="Text..." id="message-input">
+            <input type="text" name="message" placeholder="Text..." id="message-input" class="dialog-input__input">
         </div>
 
         <div class="dialog-send-button">
-            <button onclick="sendMessage();">Send</button>
+            <button onclick="sendMessage();" class="dialog-send-button__button">Send</button>
         </div>
     </main>
 
-    <footer class="footer text-center">
+    <footer class="block-footer text-center">
         <p>IdkChat 2022</p>
         Support: <a href="mailto:idkchat@pepega.ml">idkchat@pepega.ml</a>
     </footer>

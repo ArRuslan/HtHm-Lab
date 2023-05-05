@@ -26,6 +26,7 @@ function initTheme() {
     toggleBtn.onclick = toggleTheme;
 
     let btn_content = document.createElement("span");
+    btn_content.classList.add("toggle-theme-btn__content")
     btn_content.innerText = "T";
 
     toggleBtn.appendChild(btn_content);

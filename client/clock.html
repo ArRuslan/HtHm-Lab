@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Clock</title>
+  <style>
+    :root {
+      --clock-speed: 1;
+    }
+
+    .clock {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background-color: #fff;
+      border: 1px black solid;
+    }
+
+    .hour,
+    .minute,
+    .second {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-origin: bottom center;
+    }
+
+    .hour {
+      width: 6px;
+      height: 50px;
+      background-color: #00f;
+      transform: translate(-50%, -100%) rotate(0deg);
+      animation: clock-animation calc(86400s / var(--clock-speed)) linear infinite;
+    }
+
+    .minute {
+      width: 4px;
+      height: 70px;
+      background-color: #0f0;
+      transform: translate(-50%, -100%) rotate(0deg);
+      animation: clock-animation calc(3600s / var(--clock-speed)) linear infinite;
+    }
+
+    .second {
+      width: 2px;
+      height: 80px;
+      background-color: #f00;
+      transform: translate(-50%, -100%) rotate(0deg);
+      animation: clock-animation calc(60s / var(--clock-speed)) linear infinite;
+    }
+
+    @keyframes clock-animation {
+      0% {
+        transform: translate(-50%, -100%) rotate(0deg);
+      }
+      100% {
+        transform: translate(-50%, -100%) rotate(360deg);
+      }
+    }
+
+    .center-dot {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #000;
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+<div class="clock">
+  <div class="hour"></div>
+  <div class="minute"></div>
+  <div class="second"></div>
+  <div class="center-dot"></div>
+</div>
+</body>
+</html>

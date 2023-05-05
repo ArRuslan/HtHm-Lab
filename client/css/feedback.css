@@ -52,11 +52,11 @@
     margin-top: 20px;
 }
 
-.feedback-form > form > input {
+.feedback-form__input {
     font-size: 28px;
 }
 
-.feedback-form > form > textarea {
+.feedback-form__textarea {
     font-size: 18px;
 }
 

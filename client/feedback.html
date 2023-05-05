@@ -13,7 +13,7 @@
     <script src="/js/theme.js"></script>
 </head>
 <body class="theme-dark">
-<main class="content content-feedback grid-container">
+<main class="block-content content-feedback grid-container">
     <div id="video1">
         <video controls muted>
             <source src="/video/sample_video_30s.mp4">
@@ -32,15 +32,15 @@
 
     <div class="feedback-form">
         <form method="POST" action="https://formspree.io/f/mjvdjaqr" style="display: grid">
-            <input type="text" minlength="4" maxlength="32" name="name" id="feedback-name" placeholder="Name" required>
-            <input type="email" minlength="6" maxlength="64" name="_replyto" id="feedback-email" placeholder="Email" required>
-            <input type="tel" minlength="12" maxlength="12" name="phone" id="feedback-phone" placeholder="Phone number (380XXXXXXXXX)">
-            <textarea rows="6" name="message" id="feedback-message" placeholder="Message" required></textarea>
-            <input type="submit" value="Send">
+            <input type="text" minlength="4" maxlength="32" name="name" id="feedback-name" placeholder="Name" required class="feedback-form__input">
+            <input type="email" minlength="6" maxlength="64" name="_replyto" id="feedback-email" placeholder="Email" required class="feedback-form__input">
+            <input type="tel" minlength="12" maxlength="12" name="phone" id="feedback-phone" placeholder="Phone number (380XXXXXXXXX)" class="feedback-form__input">
+            <textarea rows="6" name="message" id="feedback-message" placeholder="Message" required class="feedback-form__textarea"></textarea>
+            <input type="submit" value="Send" class="feedback-form__input">
         </form>
     </div>
 </main>
-<footer class="footer text-center">
+<footer class="block-footer text-center">
     <p>IdkChat 2022</p>
     Support: <a href="mailto:idkchat@pepega.ml">idkchat@pepega.ml</a>
 </footer>

@@ -56,13 +56,13 @@
     grid-row-end: 15;
 }
 
-.auth-form-input > input, .auth-form-input > button {
+.auth-form-input__input, .auth-form-input__button {
     width: 100%;
     height: 100%;
     font-size: 18px;
 }
 
-.auth-form-input > input {
+.auth-form-input__input {
     padding-left: 10px;
     background-color: var(--bg-color-messages);
     border: 1px solid;

@@ -61,17 +61,19 @@ function addDialog(dialog_id, username, avatar_url, new_messages) {
     DIALOGS[dialog_id] = {"username": username, "avatar_url": avatar_url, "dialog_id": dialog_id, "new_messages": new_messages};
 
     let dialog = document.createElement("li");
-    dialog.classList.add("dialog");
+    dialog.classList.add("dialogs__item");
     dialog.id = `dialog-id-${dialog_id}`;
     dialog.addEventListener("click", () => {selectDialog(dialog_id)});
 
     let avatar_img = document.createElement("img");
+    avatar_img.classList.add("dialogs__item__avatar");
     avatar_img.src = avatar_url;
     avatar_img.width = 32;
     avatar_img.height = 32;
     ensureImageLoaded(avatar_img, DEFAULT_AVATAR);
 
     let name = document.createElement("span");
+    name.classList.add("dialogs__item__username");
     name.innerText = username;
     if(new_messages)
         name.style.color = "#ff0000";
@@ -94,6 +96,7 @@ function addMessage(dialog_id, message_id, type, text, time) {
         return;
 
     let message = document.createElement("li");
+    message.classList.add("messages__item");
     message.classList.add(`message-id-${message_id}`);
     message.classList.add(type === 0 ? "my-message" : "message");
 
