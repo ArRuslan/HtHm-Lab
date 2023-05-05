@@ -145,7 +145,7 @@
 
 .messages-list {
     grid-row-start: 2;
-    grid-column-start: 4;
+    grid-column-start: 1;
 
     grid-row-end: 15;
     grid-column-end: 16;
