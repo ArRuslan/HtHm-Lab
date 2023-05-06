@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lb3-11</title>
+</head>
+<body>
+<h1 style="text-align: center"><a href="lb3-11.html">Завдання №3.5 лабораторної роботи №3.</a></h1>
+
+<div style="text-align: center;" id="info"></div>
+
+<script>
+  let infoDiv = document.getElementById("info");
+
+  window.addEventListener("DOMContentLoaded", () => {
+    let userAgent = navigator.userAgent;
+    let browserInfo;
+    if (userAgent.includes('Firefox/')) {
+      browserInfo = `Firefox v${userAgent.split('Firefox/')[1].split(' ')[0]}`;
+    } else if (userAgent.includes('Edg/')) {
+      browserInfo = `Edge v${userAgent.split('Edg/')[1].split(' ')[0]}`;
+    } else if (userAgent.includes('Chrome/')) {
+      browserInfo = `Chrome v${userAgent.split('Chrome/')[1].split(' ')[0]}`;
+    } else if (userAgent.includes('Safari/')) {
+      browserInfo = `Safari v${userAgent.split('Safari/')[1].split(' ')[0]}`;
+    } else {
+      browserInfo = "Невідомий браузер."
+    }
+    infoDiv.innerText = `Ви прийшли з: ${document.referrer}\nБраузер: ${browserInfo}`;
+  }, false);
+</script>
+</body>
+</html>
